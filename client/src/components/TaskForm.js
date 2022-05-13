@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function TaskForm() {
 
@@ -16,10 +17,26 @@ export default function TaskForm() {
     title: "",
     description: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     console.log(task)
+    console.log(JSON.stringify(task))
+    setLoading(true);
+    const response = await fetch("http://localhost:5000/tasks",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(task),
+      }
+    )
+    const data = await response.json();
+    console.log(data)
+    setLoading(false);
+    navigate("/");
   }
 
   const handleChange = (e) => {
@@ -76,8 +93,13 @@ export default function TaskForm() {
                 variant="contained"
                 color="primary"
                 type="submit"
+                disabled={!task.title || !task.description}
               >
-                Save
+                {loading ? (
+                  <CircularProgress color="inherit" size={25} />
+                ) : (
+                  "Save"
+                )}
               </Button>
             </form>
           </CardContent>
