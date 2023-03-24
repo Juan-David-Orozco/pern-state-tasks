@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-// import DeleteModal from "./DeleteModal";
-//import { useNavigate } from "react-router-dom";
 import { Button, Card, CardContent, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function TaskList() {
 
   const [tasks, setTasks] = useState([]);
+
+  const navigate = useNavigate()
 
   const handleDelete = async (id) => {
     try {
@@ -28,8 +29,6 @@ export default function TaskList() {
   useEffect(() => {
     loadTasks();
   }, []);
-
-
 
   return (
     <>
@@ -57,7 +56,7 @@ export default function TaskList() {
                 <Button
                   variant="contained"
                   color="inherit"
-                  onClick={() => console.log("Actualizando")}
+                  onClick={() => navigate(`/tasks/edit/${task.id}`)}
                 >
                   Edit
                 </Button>

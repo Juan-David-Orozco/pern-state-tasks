@@ -8,8 +8,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function TaskForm() {
 
@@ -17,32 +17,62 @@ export default function TaskForm() {
     title: "",
     description: "",
   });
+
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  const params = useParams()
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log(task)
     console.log(JSON.stringify(task))
     setLoading(true);
-    const response = await fetch("http://localhost:5000/tasks",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(task),
-      }
-    )
-    const data = await response.json();
-    console.log(data)
+    if(params.id) {
+      const response = await fetch(`http://localhost:5000/tasks/${params.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(task),
+        }
+      )
+      const data = await response.json();
+      console.log(data)
+    } else {
+      const response = await fetch("http://localhost:5000/tasks",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(task),
+        }
+      )
+      const data = await response.json();
+      console.log(data)
+    }
     setLoading(false);
     navigate("/");
   }
 
+  const loadTask = async (id) => {
+    const response = await fetch(`http://localhost:5000/tasks/${id}`);
+    const data = await response.json();
+    console.log(data)
+    setTask(data);
+  }
+
   const handleChange = (e) => {
     setTask({ ...task, [e.target.name]: e.target.value });
-    //console.log(e.target.name, e.target.value);
   }
+
+  useEffect(() => {
+    if(params.id){
+      console.log(params.id)
+      loadTask(params.id);
+    }
+  }, [params.id]);
+
+  let titleForm = params.id ? "UpdateTask" : "CreateTask"
 
   return (
     <Grid
@@ -59,7 +89,7 @@ export default function TaskForm() {
             padding: "1rem",
           }}>
           <Typography variant="h5" textAlign="center" color="white">
-            Create Task
+            {titleForm}
           </Typography>
           <CardContent>
             <form onSubmit={handleSubmit}>
@@ -74,6 +104,7 @@ export default function TaskForm() {
                 onChange={handleChange}
                 inputProps={{ style: { color: "white" } }}
                 InputLabelProps={{ style: { color: "white" } }}
+                value={task.title}
               />
               <TextField
                 variant="filled"
@@ -88,6 +119,7 @@ export default function TaskForm() {
                 onChange={handleChange}
                 inputProps={{ style: { color: "white" } }}
                 InputLabelProps={{ style: { color: "white" } }}
+                value={task.description}
               />
               <Button
                 variant="contained"
